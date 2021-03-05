@@ -75,6 +75,7 @@ namespace MaglioneFramework
         {
             ID = IDListener;
             Debug.Log("Esci dal gioco");
+            Application.Quit();
         }
         #endregion
 
