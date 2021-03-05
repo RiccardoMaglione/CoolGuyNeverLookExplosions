@@ -11,12 +11,15 @@ public class PlayerController : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
-        transform.Translate(Vector3.forward * Speed * Time.deltaTime * v);
-        transform.Translate(Vector3.right * Speed * Time.deltaTime * h);
+        transform.Translate(Vector3.forward * Speed * Time.deltaTime * v);      //Muove il player sull'asse z
+        transform.Translate(Vector3.right * Speed * Time.deltaTime * h);        //Muove il player sull'asse x
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-
+        if (collision.gameObject.tag == "Bullet")                               //Se l'altro oggetto ha il tag Bullet
+        {
+            SceneManager.LoadScene("GameOver");                                 //Cambio scena in gameover
+        }
     }
 }

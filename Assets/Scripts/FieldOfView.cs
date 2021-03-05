@@ -4,30 +4,37 @@ using UnityEngine;
 
 public class FieldOfView : MonoBehaviour
 {
-	public float viewRadius;
+    #region
+    public float viewRadius;			//Variabile che indica quanto è estesa la sua vista
 	[Range(0, 360)]
-	public float viewAngle;
+	public float viewAngle;				//Variabile che indica il cono di visione
 
-	public LayerMask targetMask;
-	public LayerMask obstacleMask;
+	public LayerMask targetMask;		//Layer per gli oggetti visibili nel field of view
+	public LayerMask obstacleMask;		//Layer per gli ostacoli del field of view
 
 	public List<Transform> visibleTargets = new List<Transform>();
-
 
 	float timerAim = 0;
 	public float CountTimerAim;
 	float timerAimCooldown = 0;
 	public float CountCooldownTimerAim;
-	public bool ActivateTower;
-	public bool CanShot;
+	public bool ActivateTower;							//Booleano che attiva il line renderer della torretta
+	public bool CanShot;								//Booleano utilizzato per sparare solo una volta
 	public GameObject BulletPrefab;
 	public GameObject Eye;
-	void Start()
+	public GameObject SpawnPoint;
+	#endregion
+
+    void Start()
 	{
-		StartCoroutine("FindTargetsWithDelay", .2f);
+		StartCoroutine("FindTargetsWithDelay", .2f);	//Cerca il target ogni 0.2 secondi
 	}
 
-
+	/// <summary>
+	/// IEnumarator che cerca il target ogni delay
+	/// </summary>
+	/// <param name="delay"></param>
+	/// <returns></returns>
 	IEnumerator FindTargetsWithDelay(float delay)
 	{
 		while (true)
@@ -42,23 +49,23 @@ public class FieldOfView : MonoBehaviour
 		if (visibleTargets.Count == 0)
 		{
 			ActivateTower = false;
-			GetComponent<LineRenderer>().SetPosition(0, Vector3.zero);
-			GetComponent<LineRenderer>().SetPosition(1, Vector3.zero);
+			GetComponent<LineRenderer>().SetPosition(0, Vector3.zero);														//Resetto il line renderer alla posizione 0
+			GetComponent<LineRenderer>().SetPosition(1, Vector3.zero);														//Resetto il line renderer alla posizione 1
 		}
 
 		if (ActivateTower == true)
 		{
-			Eye.transform.LookAt(new Vector3(visibleTargets[0].transform.position.x, transform.position.y, visibleTargets[0].transform.position.z));
+			Eye.transform.LookAt(new Vector3(visibleTargets[0].transform.position.x, transform.position.y, visibleTargets[0].transform.position.z));		//Guarda il player
 			timerAim += Time.deltaTime;
 			if (timerAim > CountTimerAim)
 			{
-				GetComponent<LineRenderer>().SetPosition(0, Vector3.zero);
-				GetComponent<LineRenderer>().SetPosition(1, Vector3.zero);
+				GetComponent<LineRenderer>().SetPosition(0, Vector3.zero);													//Resetto il line renderer alla posizione 0
+				GetComponent<LineRenderer>().SetPosition(1, Vector3.zero);													//Resetto il line renderer alla posizione 1
 				if (CanShot == true)
 				{
 					print("Spara");
-					GameObject Bullet = Instantiate(BulletPrefab, transform.position, transform.rotation);
-					Bullet.transform.LookAt(visibleTargets[0]);
+					GameObject Bullet = Instantiate(BulletPrefab, SpawnPoint.transform.position, transform.rotation);		//Istanzia il proiettile nello spawn point
+					Bullet.transform.LookAt(visibleTargets[0]);																//Guarda il target player
 					CanShot = false;
 				}
 				timerAimCooldown += Time.deltaTime;
@@ -71,16 +78,19 @@ public class FieldOfView : MonoBehaviour
 			}
 			else
 			{
-				GetComponent<LineRenderer>().SetPosition(0, transform.localPosition);
-				GetComponent<LineRenderer>().SetPosition(1, visibleTargets[0].transform.localPosition);
+				GetComponent<LineRenderer>().SetPosition(0, transform.localPosition);										//Aggiorna la posizione 0 del line renderer con la posizone della torretta
+				GetComponent<LineRenderer>().SetPosition(1, visibleTargets[0].transform.localPosition);						//Aggiorna la posizione 1 del line renderer con la posizone del target
 			}
 		}
 	}
 
+	/// <summary>
+	/// Trova il target visibile nell'area di visione
+	/// </summary>
 	void FindVisibleTargets()
 	{
 		visibleTargets.Clear();
-		Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, viewRadius, targetMask);
+		Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, viewRadius, targetMask);		//Lista di collider degli oggetti dentro il field of view
 
 		for (int i = 0; i < targetsInViewRadius.Length; i++)
 		{
@@ -98,7 +108,6 @@ public class FieldOfView : MonoBehaviour
 			}
 		}
 	}
-
 
 	public Vector3 DirFromAngle(float angleInDegrees, bool angleIsGlobal)
 	{
